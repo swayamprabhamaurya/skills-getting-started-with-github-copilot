@@ -6,32 +6,23 @@ client = TestClient(app)
 
 
 def test_duplicate_signup_is_rejected():
-    # Arrange
-    activity_name = "Chess Club"
-    email = "duplicate.student@mergington.edu"
+    response = client.post("/activities/Chess Club/signup?email=michael@mergington.edu")
 
-    # Act
-    first_response = client.post(f"/activities/{activity_name}/signup?email={email}")
-    second_response = client.post(f"/activities/{activity_name}/signup?email={email}")
-
-    # Assert
-    assert first_response.status_code == 200
-    assert second_response.status_code == 400
-    assert second_response.json()["detail"] == "Student is already signed up for this activity"
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Student is already signed up for this activity"
 
 
 def test_unregister_participant_removes_them_from_activity():
-    # Arrange
-    activity_name = "Basketball Team"
-    email = "remove.me@mergington.edu"
-    client.post(f"/activities/{activity_name}/signup?email={email}")
+    activity_name = "Chess Club"
+    email = "student@mergington.edu"
 
-    # Act
-    response = client.delete(f"/activities/{activity_name}/participants/{email}")
+    signup_response = client.post(f"/activities/{activity_name}/signup?email={email}")
+    assert signup_response.status_code == 200
 
-    # Assert
-    assert response.status_code == 200
-    assert response.json()["message"] == f"Removed {email} from {activity_name}"
+    delete_response = client.delete(f"/activities/{activity_name}/participants/{email}")
 
-    activities_response = client.get("/activities")
-    assert email not in activities_response.json()[activity_name]["participants"]
+    assert delete_response.status_code == 200
+    assert delete_response.json()["message"] == f"Removed {email} from {activity_name}"
+
+    remaining = client.get("/activities")
+    assert email not in remaining.json()[activity_name]["participants"]

@@ -109,7 +109,7 @@ def signup_for_activity(activity_name: str, email: str):
 
 @app.delete("/activities/{activity_name}/participants/{email}")
 def unregister_participant(activity_name: str, email: str):
-    """Remove a student from an activity."""
+    """Remove a participant from an activity"""
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
 
